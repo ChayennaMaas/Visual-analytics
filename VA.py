@@ -6,15 +6,8 @@
 # Gemaakt door: Anna de Geeter, Chayenna Maas
 
 # ## Importeer data
-
-# In[1]:
-
-
 # !pip install dash
 # !pip install dash-bootstrap-components
-
-
-# In[2]:
 
 
 # Standard packages
@@ -43,46 +36,21 @@ from IPython.display import display, Markdown
 
 # ## Inspecteer data
 
-# In[3]:
-
-
 pollution=pd.read_csv('south-korean-pollution-data.csv')
 pollution.head()
 
-
-# In[4]:
-
-
 print('Pollution dataframe: ', pollution.shape)
 
-
-# In[5]:
-
-
 print(pollution.info())
-
-
-# In[6]:
-
 
 pollution.describe()
 
 
 # ## 1D inspecties
 
-# In[7]:
-
-
 summary=pd.read_csv('Measurement_summary.csv')
 
-
-# In[8]:
-
-
 pollution['date']=pd.to_datetime(pollution['date'])
-
-
-# In[9]:
 
 
 #Maak histogram aan om de type luchtvervuilers te inspecteren
@@ -156,24 +124,14 @@ histo.update_layout(
 
 # histo.show()
 
-
-# In[10]:
-
-
 ####Bar plot aanmaken om de particle matter 2.5 en 10 te visualiseren
 
 pollution['year']=pollution['date'].dt.year
 pollution['month']=pollution['date'].dt.month
 
 
-# In[11]:
-
-
 pm25=summary[summary['PM2.5'] < 110]
 pm10=summary[summary['PM10'] < 110]
-
-
-# In[12]:
 
 
 #Maak boxplot per stof gehalte
@@ -210,9 +168,6 @@ bar.update_layout(
 
 
 # ## 2D inspecties
-
-# In[13]:
-
 
 ####Scatter plot vervuiling per stad in Zuid-korea
 scatter = px.scatter(pollution, x="date", y=['co','no2','so2','o3'], color="City", title='<b>Metingen per stad<b>')
@@ -261,19 +216,9 @@ scatter.update_xaxes(nticks=12)
 # scatter.show()
 
 
-# In[14]:
-
-
 summary['date']=pd.to_datetime(summary['Measurement date'])
 
-
-# In[15]:
-
-
 df_date = summary['Measurement date'].str.split(" ", n=1, expand=True)
-
-
-# In[16]:
 
 
 df_date = summary['Measurement date'].str.split(" ", n=1, expand=True)
@@ -286,9 +231,6 @@ df_0 = summary.groupby(['date'], as_index=False).agg({'SO2':'mean', 'NO2':'mean'
 df_0.head()
 df_air = df_0.corr()
 df_air = summary.groupby(['date'], as_index=False).agg({'SO2':'mean', 'NO2':'mean', 'O3':'mean', 'CO':'mean', 'PM10':'mean', 'PM2.5':'mean'})
-
-
-# In[29]:
 
 
 fig_line = px.line(df_air, x='date', y=['CO','NO2','SO2','O3'], title="<b>Metingen [ppm] in Seoul<b>",labels={'date': 'Datum', 'variable':'Type:', 'value': 'Waarde [ppm]'})
@@ -341,26 +283,15 @@ fig_line.update_xaxes(nticks=12)
 
 # ## Geospatiale inspectie
 
-# In[18]:
-
-
 # Lees Air Pollution in Seoul in
 stations = pd.read_csv('Measurement_station_info.csv')
 measurements = pd.read_csv('Measurement_info.csv')
 items = pd.read_csv('Measurement_item_info.csv')
 
-
-# In[19]:
-
-
 #Laad geojson file in
 district_borders=gpd.read_file('https://raw.githubusercontent.com/southkorea/seoul-maps/master/kostat/2013/json/seoul_municipalities_topo_simple.json')
 
 district_borders.crs = "EPSG:4326"
-
-
-# In[30]:
-
 
 # Eenheid aan het item toevoegen
 items['Item name (unit)'] = items['Item name'] + ' (' + items['Unit of measurement'].str.lower() + ')'
@@ -443,10 +374,6 @@ district_pol = measures.groupby(['Station']).mean().loc[:, 'SO2 (ppm)':'PM2.5 (m
 district_pol_norm = (district_pol - district_pol.mean()) / district_pol.std()
 district_pol_norm.columns = list(map(lambda x: x.split(' ')[0],district_pol_norm.columns))
 
-
-# In[31]:
-
-
 pollution_map = folium.Map(height=800, width=1250,location=[37.562600,127.024612], tiles='cartodbpositron', zoom_start=11)
 
 # Voeg punten toe aan de map
@@ -468,9 +395,6 @@ folium.LayerControl().add_to(pollution_map)
 
 
 # ## Statistische analyse
-
-# In[32]:
-
 
 fig_scatter_pollution = px.scatter(df_air, x=['CO','NO2','SO2','O3'], y='PM2.5', trendline='ols', 
                                    labels={'variable': 'Type:','value': 'Waarde [ppm]', 'PM2.5': 'Ultra fijn stof [µm/m3]'})
@@ -521,22 +445,11 @@ fig_scatter_pollution.add_hrect(y0=30, y1=80, line_width=0, fillcolor="green", o
 
 # # Streamlit
 
-# In[33]:
-
-
 st.set_page_config(layout="wide")
-
-
-# In[34]:
-
 
 #Layout
 st.header('Luchtvervuiling in Zuid-Korea')
 st.text('Auteurs: Anna de Geeter, Chayenna Maas')
-
-
-# In[35]:
-
 
 col1, col2, col3= st.columns(3)
 
@@ -553,9 +466,6 @@ with col3:
     folium_static(pollution_map)
 
 
-# In[40]:
-
-
 st.subheader('Bronnen')
 st.text('https://raw.githubusercontent.com/southkorea/seoul-maps/master/kostat/2013/json/seoul_municipalities_topo_simple.json')
 st.text('https://www.kaggle.com/datasets/bappekim/air-pollution-in-seoul')
@@ -563,20 +473,9 @@ st.text('https://www.kaggle.com/datasets/bappekim/air-pollution-in-seoul')
 
 # # Dash
 
-# In[26]:
-
-
 # from dash import Dash, html, dcc
 
-
-# In[27]:
-
-
 # pollution_map.save('index.html')
-
-
-# In[28]:
-
 
 # app = dash.Dash(__name__)
 
